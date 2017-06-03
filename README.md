@@ -1,6 +1,6 @@
 README for AMND
 ===
-AMND is a system for identification and segmentation of myelinated nerve fibers in a cross-sectional optical-microscopic image using a convolutional neural network. It can extract only myelin sheaths from sample images. It is opetimized for our sample data, but you can customized it in accordance with image sizes, magnifications and conditions of your samples and what you want to measure.
+AMND is a system for identification and segmentation of myelinated nerve fibers in a cross-sectional optical-microscopic image using a convolutional neural network. It can extract only myelin sheaths from sample images. It is optimized for our sample data, however you can customized it in accordance with image sizes, magnifications, and conditions of your samples and what you want to measure.
 
 INSTALL
 ===
