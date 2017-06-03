@@ -15,4 +15,4 @@ Two main packages must be installed to run our program.
 
 USAGE
 ===
-Download all into your convenient directory. You can put your sample data into "samples" folder and just run "amnd.py". The extension of sample data must be "bmp", "jpg", "png", or "tiff". Each result output will be saved in "samples" folder with the name of "result_" in the head of each original filename. 
+Download all into your favorite directory. You can put your sample data into "samples" folder and just run "amnd.py". The extension of sample data must be "bmp", "jpg", "png", or "tiff". Each result output will be saved in "samples" folder with the name of "result_" in the head of each original filename. 
