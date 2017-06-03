@@ -61,10 +61,9 @@ def find_contours(img, count_holes=False):
                 contours.append(all_contours[i])
                 if count_holes:
                     hole_counts.append(np.count_nonzero(hierarchy[0, :, 3] == i))
-    if not count_holes:
-        return contours
-    else:
+    if count_holes:
         return ([contours, hole_counts])
+    return contours        
 
 
 def clump_splitting(contour):
@@ -92,11 +91,13 @@ def clump_splitting(contour):
         u12 = contour[f2][0]-contour[f1][0] 
         CC = math.pi - math.acos(round(np.dot(v1,v2) / 
                                 (np.linalg.norm(contour[f1][0]-(contour[s1][0]+contour[e1][0])/2)
-                                * np.linalg.norm(contour[f2][0]-(contour[s2][0]+contour[e2][0])/2)), 3))
-        CL = max(math.acos(round(np.dot(v1, u12) / (np.linalg.norm(contour[f1][0]-(contour[s1][0]+contour[e1][0])/2)
-                                                    * np.linalg.norm(contour[f2][0]-contour[f1][0])), 3)), \
-        math.acos(round(np.dot(v2,-u12) / (np.linalg.norm(contour[f2][0] - (contour[s2][0] + contour[e2][0])/2) * np.linalg.norm(contour[f2][0] - \
-        contour[f1][0])), 3)))
+                                *np.linalg.norm(contour[f2][0]-(contour[s2][0]+contour[e2][0])/2)), 3))
+        CL = max(math.acos(round(np.dot(v1, u12) /
+                                (np.linalg.norm(contour[f1][0]-(contour[s1][0]+contour[e1][0])/2)
+                                *np.linalg.norm(contour[f2][0]-contour[f1][0])), 3)),
+                 math.acos(round(np.dot(v2,-u12) /
+                                (np.linalg.norm(contour[f2][0]-(contour[s2][0]+contour[e2][0])/2)
+                                *np.linalg.norm(contour[f2][0]-contour[f1][0])), 3)))
         fs1 = contour[s1][0]-contour[f1][0]
         fe1 = contour[e1][0]-contour[f1][0]
         fs2 = contour[s2][0]-contour[f2][0]
@@ -172,66 +173,66 @@ def identify(contour2, hole_count, x1, y1):
         return
 
 
-if __name__ == "__main__":
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    model = pickle.load(open("model", "rb"))
-    samples = os.listdir("samples")
-    os.chdir("samples")
-    for sample in samples:
-        path, ext = os.path.splitext(sample)
-        if not ext in [".bmp", ".jpg", ".png", ".tiff"]:
-            continue
-        print ("Now processing: {}".format(sample))
-        img = cv2.imread(sample, 0)
-        h, w = img.shape
-        
-        # Normalization
-        high = np.percentile(img, 99)
-        low = np.percentile(img, 0.01)
-        img[img >= high] = high
-        img[img <= low] = low
-        img = cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
-
-        # Segmentation with competitive learning
-        clusters, labels = competitive_learning(img, 3)
-        extracted = np.array([255] * (h*w))
-        extracted[np.array(labels) == 0] = 0
-        extracted = extracted.reshape((h, w))
-        h += 4
-        w += 4
-        expanded_img = np.full((h, w), 255, dtype = np.uint8)
-        expanded_img[2:-2, 2:-2] = img
-        expanded_extracted = np.full((h, w), 255, dtype = np.uint8)
-        expanded_extracted[2:-2, 2:-2] = extracted
-
-        contours = find_contours(expanded_extracted)
-        result = np.full((h, w), 255, dtype = np.uint8)
-        
-        for contour in contours:
-            x1, y1, w1, h1 = cv2.boundingRect(contour)
+# main
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
+model = pickle.load(open("model", "rb"))
+samples = os.listdir("samples")
+os.chdir("samples")
+for sample in samples:
+    path, ext = os.path.splitext(sample)
+    if not ext in [".bmp", ".jpg", ".png", ".tiff"]:
+        continue
+    print ("Now processing: {}".format(sample))
+    img = cv2.imread(sample, 0)
+    h, w = img.shape
     
-            # Segmentation with k-means algorithm
-            bounded = expanded_img[y1:y1+h1, x1:x1+w1]
-            bounded = np.float32(bounded.reshape((-1, 1)))
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0)
-            compactness, labels, centers = cv2.kmeans(bounded, 3, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
-            labels = labels.reshape((h1, w1))
-            extracted_bounded = np.full((h1, w1), 255, dtype = np.uint8)
-            extracted_bounded[labels == np.argmin(centers)] = 1
-            mask = np.full((h, w), 0, dtype = np.uint8)
-            cv2.drawContours(mask, [contour], 0, 255, -1)
-            mask = mask[y1:y1+h1, x1:x1+w1]
-            extracted_bounded = cv2.bitwise_and(extracted_bounded, extracted_bounded, mask = mask)
-            extracted_bounded[extracted_bounded == 0] = 255
-            expanded_extracted_bounded = np.full((h1+6, w1+6), 255, dtype = np.uint8)
-            expanded_extracted_bounded[3:-3, 3:-3] = extracted_bounded
+    # Normalization
+    high = np.percentile(img, 99)
+    low = np.percentile(img, 0.01)
+    img[img >= high] = high
+    img[img <= low] = low
+    img = cv2.normalize(img, img, 0, 255, cv2.NORM_MINMAX)
 
-            contours2, hole_counts2 = find_contours(expanded_extracted_bounded, count_holes = True)
+    # Segmentation with competitive learning
+    clusters, labels = competitive_learning(img, 3)
+    extracted = np.array([255] * (h*w))
+    extracted[np.array(labels) == 0] = 0
+    extracted = extracted.reshape((h, w))
+    h += 4
+    w += 4
+    expanded_img = np.full((h, w), 255, dtype = np.uint8)
+    expanded_img[2:-2, 2:-2] = img
+    expanded_extracted = np.full((h, w), 255, dtype = np.uint8)
+    expanded_extracted[2:-2, 2:-2] = extracted
 
-            # identification with the trained CNN model and clump splitting
-            for i, contour2 in enumerate(contours2):
-                identify(contour2, hole_counts2[i], x1, y1)
+    contours = find_contours(expanded_extracted)
+    result = np.full((h, w), 255, dtype = np.uint8)
+    
+    for contour in contours:
+        x1, y1, w1, h1 = cv2.boundingRect(contour)
 
-        cv2.imwrite("result_{}.png".format(path), result[3:-3, 3:-3])
+        # Segmentation with k-means algorithm
+        bounded = expanded_img[y1:y1+h1, x1:x1+w1]
+        bounded = np.float32(bounded.reshape((-1, 1)))
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0)
+        compactness, labels, centers = cv2.kmeans(bounded, 3, None, criteria, 5, cv2.KMEANS_RANDOM_CENTERS)
+        labels = labels.reshape((h1, w1))
+        extracted_bounded = np.full((h1, w1), 255, dtype = np.uint8)
+        extracted_bounded[labels == np.argmin(centers)] = 1
 
-    print ("The process was done")
+        mask = np.full((h, w), 0, dtype = np.uint8)
+        cv2.drawContours(mask, [contour], 0, 255, -1)
+        mask = mask[y1:y1+h1, x1:x1+w1]
+        extracted_bounded = cv2.bitwise_and(extracted_bounded, extracted_bounded, mask = mask)
+        extracted_bounded[extracted_bounded == 0] = 255
+        expanded_extracted_bounded = np.full((h1+6, w1+6), 255, dtype = np.uint8)
+        expanded_extracted_bounded[3:-3, 3:-3] = extracted_bounded
+        contours2, hole_counts2 = find_contours(expanded_extracted_bounded, count_holes = True)
+
+        # identification with the trained CNN model and clump splitting
+        for i, contour2 in enumerate(contours2):
+            identify(contour2, hole_counts2[i], x1, y1)
+
+    cv2.imwrite("result_{}.png".format(path), result[3:-3, 3:-3])
+
+print ("The process was done")
