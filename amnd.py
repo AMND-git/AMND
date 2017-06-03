@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import os
 import numpy as np
 import cv2
@@ -117,8 +116,7 @@ def clump_splitting(contour):
 
 def classify(model, img):
     img = cv2.resize(img, (64, 64))
-    img = [img]
-    img = np.array(img).astype(np.float32).reshape((len(img),1, 64, 64))/255
+    img = np.array([img]).astype(np.float32).reshape((1, 1, 64, 64))/255
     x = chainer.Variable(img)
     h = F.max_pooling_2d(F.relu(model.bnorm1(model.conv1(x))), 2)
     h = F.max_pooling_2d(F.relu(model.bnorm2(model.conv2(h))), 2)
