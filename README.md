@@ -10,7 +10,7 @@ Required
 ---
 Two main packages must be installed to run our program. 
 * [Chainer] (https://chainer.org/). It is a framework for neural networks. We recommend Chainer 1.13.0 since different versions may cause unexpected errors.
-* [OpenCV] (http://opencv.org/). It is a library mainly for computer vision and image processing. We recommend OpenCV 3.2.0 since other versions may cause unexpected errors.
+* [OpenCV] (http://opencv.org/). It is a library mainly for computer vision and image processing. We recommend OpenCV 3.2.0 since different versions may cause unexpected errors.
 * Several packages are required for using these two packages. Please read the official documentations.
 
 USAGE
