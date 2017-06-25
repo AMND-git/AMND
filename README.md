@@ -19,6 +19,6 @@ Download all into your favorite directory. You can put your sample data into "sa
 
 LICENSE
 ===
-The souce code can be modified without notice.
-No claim of suitability, guarantee, or any warranty whatever happens.
+The souce code can be modified without notice.  
+No claim of suitability, guarantee, or any warranty whatever happens.  
 AMND is freely available for non-commercial use. If you are planning on using AMND in a commercial application, please contact us.
