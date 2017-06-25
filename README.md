@@ -16,3 +16,9 @@ Two main packages must be installed to run our program.
 USAGE
 ===
 Download all into your favorite directory. You can put your sample data into "samples" folder and just run "amnd.py". The extensions of sample data must be "bmp", "jpg", "png", or "tiff". Each result output will be saved in "samples" folder with the name of "result_" in the head of each original filename. 
+
+LICENSE
+===
+The souce code can be modified without notice.
+No claim of suitability, guarantee, or any warranty whatever happens.
+AMND is freely available for non-commercial use. If you are planning on using AMND in a commercial application, please contact us.
